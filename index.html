@@ -120,5 +120,92 @@
 	      
 	  </div>
 	</div>
+<script src="./web3_vendor/web3/dist/web3.min.js"></script>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/fixedheader/3.1.5/js/dataTables.fixedHeader.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/responsive/2.2.3/js/responsive.bootstrap.min.js"></script>
+<script src="./initialize.js"></script>
+<script src="./main.js"></script>
+<script type="text/javascript">
+
+
+	var table = $('#propertytable').DataTable( {
+        responsive: true
+    } );
+ 
+    new $.fn.dataTable.FixedHeader( table );
+
+	$("#create_property").submit(function(event){
+		event.preventDefault();
+		var owner_name = $("#owner_name").val();
+		var location = $("#location").val();
+		var cost = $("#cost").val();
+		var size = $("#size").val();
+		var type = $("#type").val();
+		var tax = $("#tax").val();
+		var new_property_addr = "";
+		new_property_addr = GovernmentManage.NewPropertyCreate(owner_name, location, type, size, cost, tax, (err, res) => {
+			if(res){
+				console.log(res);
+			}else if(err){
+				console.log(err);
+			}
+		});
+	});
+
+	$(document).on("click","#sign-btn",function(){
+		var addr = $(this).data("address");
+		return GovernmentManage.GovernmentSign(addr,(err, res) => {
+	        if (res){
+	            $("#loading").show();
+	            $("#status").text("Government Singing on Property... !");
+	        }
+	        if(err){
+	            $("#loading").hide();
+	            $("#status").text(err);
+	        }
+	    });
+	});
+
+	var SignLog = GovernmentManage.GovernmentSigned({},"latest");
+	SignLog.watch(function (err, result) {
+	    if (!err) {
+	        $("#loading").hide();
+	        $("#status").text("Successfully Signed At" + result.args.time.toString());
+	    } else {
+	        $("#loading").hide();
+	        $("#status").text(error);
+	    }
+	});
+
+	$(document).on("click","#transfer-btn",function(){
+		var addr = $(this).data("address");
+		$("#property_address").val(addr);
+		
+	});
+
+	$("#transferownershipform").submit(function(event){
+		event.preventDefault();
+
+		var addr = $("#property_address").val();
+		var new_owner_addr = $("#new_owner").val();
+		return propertycontractContract.at(addr).transferOwnership(new_owner_addr,(err, res) => {
+	        if (res){
+	            $("#loading").show();
+	            $("#status").text("Transfering ownership... !");
+	        }
+	        if(err){
+	            $("#loading").hide();
+	            $("#status").text(err);
+	        }
+	    });
+	});
+
+</script>
 </body>
 </html>
